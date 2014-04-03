@@ -18,18 +18,27 @@ def check_test_files():
         print "No tests found (tests need to be named test_*.py)."
         sys.exit(1)
     else:
+        old_pyc_filenames = _get_pyc_filenames()
         num_problems = sum((1 for filename in test_filenames
             if not _tests_passed(filename) or not _coverage_complete()))
+        _remove_new_pyc_files(old_pyc_filenames)
         sys.exit(1 if num_problems > 0 else 0)
 
 
-
 def _get_test_filenames():
-    return [fname for fname in os.listdir(".") if _is_unittest_file(fname)]
+    return [fname for fname in _cwd() if _is_unittest_file(fname)]
 
 
 def _is_unittest_file(filename):
     return filename.startswith("test_") and filename.endswith(".py")
+
+
+def _cwd():
+    return os.listdir(".")
+
+
+def _get_pyc_filenames():
+    return [fname for fname in _cwd() if fname.endswith(".pyc")]
 
 
 def _tests_passed(filename):
@@ -70,6 +79,13 @@ def _is_class(coverage_out_line):
 
 def _is_line_covered(coverage_out_line):
     return "100%" in coverage_out_line
+
+
+def _remove_new_pyc_files(old_pyc_filenames):
+    all_pyc_filenames = _get_pyc_filenames()
+    new_pyc_filenames = list(set(all_pyc_filenames) - set(old_pyc_filenames))
+    for pyc_filename in new_pyc_filenames:
+        os.remove(pyc_filename)
 
 
 check_test_files()
