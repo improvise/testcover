@@ -9,16 +9,19 @@
 
 import os
 import subprocess
+import sys
 
 
 def check_test_files():
     test_filenames = _get_test_filenames()
     if len(test_filenames) == 0:
         print "No tests found (tests need to be named test_*.py)."
+        sys.exit(1)
     else:
-        for filename in test_filenames:
-            if _tests_passed(filename):
-                _coverage_complete()
+        num_problems = sum((1 for filename in test_filenames
+            if not _tests_passed(filename) or not _coverage_complete()))
+        sys.exit(1 if num_problems > 0 else 0)
+
 
 
 def _get_test_filenames():
