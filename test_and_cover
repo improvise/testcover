@@ -42,19 +42,15 @@ def _get_pyc_filenames():
 
 
 def _tests_passed(filename):
-    test_out = subprocess.check_output(
-        ["coverage", "run", "--branch", filename],
-        stderr=subprocess.STDOUT
-    )
-    if _tests_output_passed(test_out):
+    try:
+        subprocess.check_output(
+            ["coverage", "run", "--branch", filename],
+            stderr=subprocess.STDOUT
+        )
         return True
-    else:
-        print test_out
+    except subprocess.CalledProcessError as e:
+        print e.output
         return False
-
-
-def _tests_output_passed(test_out):
-    return test_out.split('\n')[-2] == 'OK'
 
 
 def _coverage_complete():
