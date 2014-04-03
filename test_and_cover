@@ -12,13 +12,17 @@ import subprocess
 
 
 def check_test_files():
-    for filename in _get_test_filenames():
-        if _tests_passed(filename):
-            _coverage_complete()
+    test_filenames = _get_test_filenames()
+    if len(test_filenames) == 0:
+        print "No tests found (tests need to be named test_*.py)."
+    else:
+        for filename in test_filenames:
+            if _tests_passed(filename):
+                _coverage_complete()
 
 
 def _get_test_filenames():
-    return (fname for fname in os.listdir(".") if _is_unittest_file(fname))
+    return [fname for fname in os.listdir(".") if _is_unittest_file(fname)]
 
 
 def _is_unittest_file(filename):
