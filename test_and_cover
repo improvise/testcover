@@ -12,7 +12,11 @@ import subprocess
 import sys
 
 
-def check_test_files():
+# absolute file path (String) for a specific config file; or None
+config_file_loc = None
+
+
+def check_test_files(config_file_loc):
     test_filenames = _get_test_filenames()
     if len(test_filenames) == 0:
         print "No tests found (tests need to be named test_*.py)."
@@ -20,7 +24,8 @@ def check_test_files():
     else:
         old_pyc_filenames = _get_pyc_filenames()
         num_problems = sum((1 for filename in test_filenames
-            if not _tests_passed(filename) or not _coverage_complete()))
+            if not _tests_passed(filename)
+            or not _coverage_complete(config_file_loc)))
         _remove_new_pyc_files(old_pyc_filenames)
         sys.exit(1 if num_problems > 0 else 0)
 
@@ -53,8 +58,14 @@ def _tests_passed(filename):
         return False
 
 
-def _coverage_complete():
-    coverage_out = subprocess.check_output(["coverage", "report", "-m"])
+def _coverage_complete(config_file_loc):
+    assert config_file_loc is None or type(config_file_loc) is str
+    if type(config_file_loc) is str:
+        coverage_out = subprocess.check_output([
+            "coverage", "report", "-m", "--rcfile="+config_file_loc])
+    else:
+        coverage_out = subprocess.check_output([
+            "coverage", "report", "-m"])
     if _coverage_output_complete(coverage_out):
         return True
     else:
@@ -84,4 +95,4 @@ def _remove_new_pyc_files(old_pyc_filenames):
         os.remove(pyc_filename)
 
 
-check_test_files()
+check_test_files(config_file_loc)
