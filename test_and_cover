@@ -69,15 +69,21 @@ def _coverage_complete(config_file_loc):
     if _coverage_output_complete(coverage_out):
         return True
     else:
-        print coverage_out
         return False
 
 
 def _coverage_output_complete(coverage_out):
-    return sum([
-            1 for line in coverage_out.split('\n')
-                if _is_class(line) and not _is_line_covered(line)
-        ]) == 0
+    found_uncovered_line = False
+    missed_coverage = [line for line in coverage_out.split('\n')
+        if _is_class(line) and not _is_line_covered(line)]
+    if len(missed_coverage) == 0:
+        return True
+    else:
+        title = coverage_out[:coverage_out.index('\n')]
+        print title
+        for line in missed_coverage:
+            print line
+        return False
 
 
 def _is_class(coverage_out_line):
